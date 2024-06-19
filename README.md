@@ -20,7 +20,7 @@ The application should have a landing page with basic information on what it's a
 - [HTML5](https://developer.mozilla.org/en-US/docs/Web/HTML) for the structure of the landing page
 - [CSS3](https://developer.mozilla.org/en-US/docs/Web/CSS) for styling
 - [Bootstrap 5](https://getbootstrap.com/) for faster development, responsiveness
-- JavaScript for some functionalities
+- [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference) for some functionalities
 - [D3.js](https://d3js.org/) for displaying some of the visual data
 
 ## Installation
@@ -39,4 +39,10 @@ The application should have a landing page with basic information on what it's a
 5. Install the required packages
 
     `pip install -r requirements.txt`
+1. Rename the example.env to add your environment varibles
+   
+   `mv example.env .env`
 
+2. To run the application
+   
+   `python app.py`
