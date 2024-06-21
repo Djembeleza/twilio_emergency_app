@@ -13,7 +13,12 @@ from dotenv import dotenv_values
 
 config = dotenv_values('.env')
 
+genai.configure(
+    api_key=config["GOOGLE_API_KEY"]
+)
+
 app = Flask(__name__)
+app.secret_key = config["SECRET_KEY"]
 app.config.from_object(__name__)
 
 @app.route('/')
