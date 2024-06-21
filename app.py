@@ -1,3 +1,4 @@
+from logging.config import dictConfig
 import google.generativeai as genai
 
 from twilio.twiml.messaging_response import MessagingResponse
@@ -17,6 +18,23 @@ genai.configure(
     api_key=config["GOOGLE_API_KEY"]
 )
 
+dictConfig({
+    'version': 1,
+    'formatters': {'default': {
+        'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+    }},
+    'handlers': {'wsgi': {
+        'class': 'logging.StreamHandler',
+        'stream': 'ext://flask.logging.wsgi_errors_stream',
+        'formatter': 'default'
+    }},
+    'root': {
+        'level': 'INFO',
+        'handlers': ['wsgi']
+    }
+})
+
+
 app = Flask(__name__)
 app.secret_key = config["SECRET_KEY"]
 app.config.from_object(__name__)
@@ -29,7 +47,12 @@ def whats_good():
 def hello():
     model = genai.GenerativeModel("gemini-1.5-flash")
 
-    chat_history:list = session.get(request.values.get("From"), [])
+    chat_history:list = session.get(request.values.get("From"), [
+        {
+            'role': "model",
+            'parts': ["I am Handy, your trusted SMS South African assistant for emergencies, how can I help you?"]
+        }
+    ])
     body = request.values.get('Body', None)
     
     messages = chat_history
@@ -39,7 +62,7 @@ def hello():
         'parts': [body]
     })
 
-    res = model.generate_content(messages)
+    res = model.generate_content(messages) if "end convo" not in body else "Thank you. Always here to give you a hand."
 
     messages.append(
         {
@@ -48,7 +71,14 @@ def hello():
         }
     )
 
-    session[request.values.get("From")] = messages
+    if "end convo" not in body:
+
+        session[request.values.get("From")] = messages
+    else:
+        session.pop(
+            request.values.get('From'),
+            None
+        )
 
     response = MessagingResponse()
     response.message(res.text)
