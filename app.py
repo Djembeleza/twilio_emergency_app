@@ -62,13 +62,17 @@ def hello():
         'parts': [body]
     })
 
-    res = model.generate_content(messages) if "end convo" not in body else "Thank you. Always here to give you a hand."
+    res = model.generate_content(messages) if "end convo" not in body else {'text': "Thank you. Always here to give you a hand."}
 
     messages.append(
         {
             'role': "model",
             'parts': [res.text]
         }
+    )
+
+    print(
+        session
     )
 
     if "end convo" not in body:
