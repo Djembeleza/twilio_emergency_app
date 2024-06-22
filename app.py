@@ -12,6 +12,10 @@ from flask import (
 
 from dotenv import dotenv_values
 
+from utils.util import (
+    read_file
+)
+
 config = dotenv_values('.env')
 
 genai.configure(
@@ -45,13 +49,10 @@ def whats_good():
 
 @app.route('/sms', methods=["POST"])
 def hello():
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("gemini-1.5-flash", system_instruction=read_file('prompts/emergency.txt'))
 
     chat_history:list = session.get(request.values.get("From"), [
-        {
-            'role': "model",
-            'parts': ["I am Handy, your trusted SMS South African assistant for emergencies, how can I help you?"]
-        }
+      
     ])
     body = request.values.get('Body', None)
     
