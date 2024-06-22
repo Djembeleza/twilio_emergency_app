@@ -48,7 +48,7 @@ Response = namedtuple("Response", ['text'])
 
 @app.route('/')
 def whats_good():
-    return "<h1>What's goood, nyigga !</h1>"
+    return render_template('landing_page.html')
 
 @app.route('/sms', methods=["POST"])
 def hello():
