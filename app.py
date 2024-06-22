@@ -1,4 +1,5 @@
 from logging.config import dictConfig
+from collections import namedtuple
 import google.generativeai as genai
 
 from twilio.twiml.messaging_response import MessagingResponse
@@ -43,6 +44,8 @@ app = Flask(__name__)
 app.secret_key = config["SECRET_KEY"]
 app.config.from_object(__name__)
 
+Response = namedtuple("Response", ['text'])
+
 @app.route('/')
 def whats_good():
     return "<h1>What's goood, nyigga !</h1>"
@@ -51,43 +54,35 @@ def whats_good():
 def hello():
     model = genai.GenerativeModel("gemini-1.5-flash", system_instruction=read_file('prompts/emergency.txt'))
 
-    chat_history:list = session.get(request.values.get("From"), [
-      
-    ])
+    chat_history = session.get(request.values.get("From"), [])
+
     body = request.values.get('Body', None)
-    
     messages = chat_history
-    
     messages.append({
         "role": "user",
         'parts': [body]
     })
 
-    res = model.generate_content(messages) if "end convo" not in body else {'text': "Thank you. Always here to give you a hand."}
+    if "end convo" not in body:
+        res = model.generate_content(messages)
+    else:
+        res = Response("Thank you. Always here to give you a hand.")
 
-    messages.append(
-        {
-            'role': "model",
-            'parts': [res.text]
-        }
-    )
-
-    print(
-        session
-    )
+    messages.append({
+        'role': "model",
+        'parts': [res.text]
+    })
 
     if "end convo" not in body:
-
         session[request.values.get("From")] = messages
     else:
-        session.pop(
-            request.values.get('From'),
-            None
-        )
+        session.pop(request.values.get('From'), None)
 
     response = MessagingResponse()
     response.message(res.text)
+
     return str(response)
+
 
 
 if __name__ == '__main__':
